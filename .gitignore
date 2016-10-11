@@ -1,0 +1,4 @@
+files/*
+*.csv
+*.json
+.idea/*

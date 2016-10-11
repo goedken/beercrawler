@@ -1,5 +1,7 @@
 import scrapy
 import json
+from scrapy.loader import ItemLoader
+from beercrawler.items import BeercrawlerItem
 
 
 class BeerSpider(scrapy.Spider):
@@ -33,13 +35,14 @@ class BeerSpider(scrapy.Spider):
     for url in listToSearch:
         stringToAdd = "https://www.beeradvocate.com" + url
         start_urls.append(stringToAdd)
-    #
-    # print len(start_urls)
-    # print start_urls
+
 
     def parse(self, response):
+        f = open('files/%s.html' % response.url.split('/')[6], 'w')
+        f.write(response.body)
         for beer in response.css('body'):
             yield {
+                'id': int(response.url.split('/')[6]),
                 'name': beer.css('div.titleBar h1::text').extract_first(),
                 'brewery': beer.css('div.titleBar h1 span::text').extract_first()[3:],
                 'state': beer.css('div.break a[href*=US]::text')[0].extract(),
