@@ -36,7 +36,6 @@ class BeerSpider(scrapy.Spider):
         stringToAdd = "https://www.beeradvocate.com" + url
         start_urls.append(stringToAdd)
 
-
     def parse(self, response):
         f = open('files/%s.html' % response.url.split('/')[6], 'w')
         f.write(response.body)

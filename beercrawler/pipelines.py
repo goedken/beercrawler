@@ -22,10 +22,10 @@ class CSVPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        file = open('beeradv.csv', 'w+b')
+        file = open('untappd.csv', 'w+b')
         self.files[spider] = file
         self.exporter = CsvItemExporter(file)
-        self.exporter.fields_to_export = ['id', 'brewery', 'name', 'style', 'state', 'country']
+        self.exporter.fields_to_export = ['id', 'brewery', 'name', 'style', 'abv', 'ibu', 'rating']
         self.exporter.start_exporting()
 
     def spider_closed(self, spider):

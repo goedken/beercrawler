@@ -2,3 +2,4 @@ files/*
 *.csv
 *.json
 .idea/*
+untappdfiles/*
