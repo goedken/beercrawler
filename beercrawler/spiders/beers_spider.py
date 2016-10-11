@@ -1,11 +1,41 @@
 import scrapy
+import json
 
 
 class BeerSpider(scrapy.Spider):
     name = "beers"
+
+    with open('beerlinks.json') as urlList:
+        data = json.load(urlList)
+
+    list = []
+    i = 0
+    while i < len(data):
+        j = 0
+        while j < len(data[i]['name']):
+            list.append(data[i]['name'][j])
+            j += 1
+        i += 1
+
     start_urls = [
-        'https://www.beeradvocate.com/beer/profile/28743/136936/'
+        'https://www.beeradvocate.com/beer/profile/287/1093/'
     ]
+
+    listToSearch = []
+
+    for url in list:
+        # print url
+        if len(listToSearch) != 4000:
+            listToSearch.append(url)
+        else:
+            break
+
+    for url in listToSearch:
+        stringToAdd = "https://www.beeradvocate.com" + url
+        start_urls.append(stringToAdd)
+    #
+    # print len(start_urls)
+    # print start_urls
 
     def parse(self, response):
         for beer in response.css('body'):
@@ -15,6 +45,6 @@ class BeerSpider(scrapy.Spider):
                 'state': beer.css('div.break a[href*=US]::text')[0].extract(),
                 'country': beer.css('div.break a[href*=US]::text')[1].extract(),
                 'style': beer.css('div.break a[href*=style] b::text').extract_first(),
-                'abv': beer.xpath("//div[contains(@style, 'width:70%')]/text").extract()
+                # # 'abv': beer.xpath("//div[contains(@style, 'width:70%')]/text).extract()
+                # 'name': beer.css('ul li a[href*=profile]::attr(href)').extract()
             }
-
