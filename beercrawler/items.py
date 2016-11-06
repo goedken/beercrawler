@@ -8,9 +8,19 @@
 import scrapy
 
 
-class BeercrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    url = scrapy.Field()
-    html = scrapy.Field()
-    pass
+# class BeercrawlerItem(scrapy.Item):
+#     # define the fields for your item here like:
+#     # name = scrapy.Field()
+#     url = scrapy.Field()
+#     html = scrapy.Field()
+#     pass
+
+class Beer(scrapy.Item):
+    id = scrapy.Field()
+    name = scrapy.Field()
+    brewery = scrapy.Field()
+    style = scrapy.Field()
+    rating = scrapy.Field()
+    abv = scrapy.Field()
+    state = scrapy.Field()
+    country = scrapy.Field()

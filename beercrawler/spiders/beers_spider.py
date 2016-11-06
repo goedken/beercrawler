@@ -1,7 +1,8 @@
 import scrapy
 import json
+import unicodedata
 from scrapy.loader import ItemLoader
-from beercrawler.items import BeercrawlerItem
+#from beercrawler.items import BeercrawlerItem
 
 
 class BeerSpider(scrapy.Spider):
@@ -40,6 +41,16 @@ class BeerSpider(scrapy.Spider):
         f = open('files/%s.html' % response.url.split('/')[6], 'w')
         f.write(response.body)
         for beer in response.css('body'):
+            abvraw = beer.css('div.break')[1].extract()
+            abvraw.encode('ascii', 'ignore')
+            abvIndex = abvraw.find('%', 40) - 4
+            if abvraw[abvIndex:abvIndex+4] == '/div':
+                abvtext = '"'
+            else:
+                abvtext = abvraw[abvIndex:abvIndex+4]
+            # print '000000000000000000000000000000000000000000000000000000000000000000000000'
+            # print abvraw[abvIndex:abvIndex+4]
+            # print abvIndex
             yield {
                 'id': int(response.url.split('/')[6]),
                 'name': beer.css('div.titleBar h1::text').extract_first(),
@@ -47,6 +58,7 @@ class BeerSpider(scrapy.Spider):
                 'state': beer.css('div.break a[href*=US]::text')[0].extract(),
                 'country': beer.css('div.break a[href*=US]::text')[1].extract(),
                 'style': beer.css('div.break a[href*=style] b::text').extract_first(),
-                # # 'abv': beer.xpath("//div[contains(@style, 'width:70%')]/text).extract()
+                'rating': beer.css('span.ba-ravg::text').extract_first(),
+                'abv': abvtext
                 # 'name': beer.css('ul li a[href*=profile]::attr(href)').extract()
             }

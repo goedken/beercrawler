@@ -68,6 +68,7 @@ ITEM_PIPELINES = {
     #'beercrawler.pipelines.SomePipeline': 300,
     #'beercrawler.pipelines.HtmlFilePipeline': 300,
     'beercrawler.pipelines.CSVPipeline': 300,
+    'beercrawler.pipelines.JsonWriterPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
