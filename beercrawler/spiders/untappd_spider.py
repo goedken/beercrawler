@@ -2,15 +2,19 @@ import scrapy
 from scrapy.loader import ItemLoader
 from beercrawler.items import Beer
 
+saveHTML = ""
 
-class BeerSpider(scrapy.Spider):
+
+class UntappdSpider(scrapy.Spider):
     name = "untappd"
     allowed_domains = ["https://untappd.com/beer/"]
     start_urls = ['https://untappd.com/beer/']
 
-    numToCrawl = raw_input("How many untappd beers do you want to crawl? ")
+    # print "about to crawl " + name
+    # numToCrawl = raw_input("How many beers do you want to crawl? ")
+
     i = 1
-    while i < int(numToCrawl):
+    while i < 4000: # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
         start_urls.append('https://untappd.com/beer/' + str(i))
         i += 1
 

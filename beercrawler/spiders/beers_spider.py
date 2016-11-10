@@ -25,10 +25,14 @@ class BeerSpider(scrapy.Spider):
     ]
 
     listToSearch = []
+    #
+    #
+    # print "you are about to name
+    # numToCrawl = raw_input("How many beers would you like to crawl (up to 40000)? ")
 
     for url in list:
         # print url
-        if len(listToSearch) != 4000:
+        if len(listToSearch) != 10: # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
             listToSearch.append(url)
         else:
             break
@@ -38,7 +42,7 @@ class BeerSpider(scrapy.Spider):
         start_urls.append(stringToAdd)
 
     def parse(self, response):
-        f = open('files/%s.html' % response.url.split('/')[6], 'w')
+        f = open('beerfiles/%s.html' % response.url.split('/')[6], 'w+')
         f.write(response.body)
         for beer in response.css('body'):
             abvraw = beer.css('div.break')[1].extract()
