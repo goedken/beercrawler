@@ -32,7 +32,7 @@ class BeerSpider(scrapy.Spider):
 
     for url in list:
         # print url
-        if len(listToSearch) != 10: # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
+        if len(listToSearch) != 10:  # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
             listToSearch.append(url)
         else:
             break
