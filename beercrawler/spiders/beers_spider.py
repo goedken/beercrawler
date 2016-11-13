@@ -1,8 +1,14 @@
 import scrapy
 import json
+import string
+from beercrawler.items import Beer
 import unicodedata
 from scrapy.loader import ItemLoader
 #from beercrawler.items import BeercrawlerItem
+
+stopwords = ['brewery', 'brewing', 'co', 'company', 'restaurant', '&', 'brewpub', 'inc', 'spirits']
+
+beerids = []
 
 
 class BeerSpider(scrapy.Spider):
@@ -32,7 +38,7 @@ class BeerSpider(scrapy.Spider):
 
     for url in list:
         # print url
-        if len(listToSearch) != 10:  # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
+        if len(listToSearch) != 6000:  # SET HOW MANY PAGES YOU WANT TO CRAWL HERE
             listToSearch.append(url)
         else:
             break
@@ -47,22 +53,65 @@ class BeerSpider(scrapy.Spider):
         for beer in response.css('body'):
             abvraw = beer.css('div.break')[1].extract()
             abvraw.encode('ascii', 'ignore')
-            abvIndex = abvraw.find('%', 40) - 4
-            if abvraw[abvIndex:abvIndex+4] == '/div':
+            abvIndex = abvraw.find('%', 40) - 5
+            if abvraw[abvIndex:abvIndex+4].strip() == '/div':
                 abvtext = '"'
             else:
-                abvtext = abvraw[abvIndex:abvIndex+4]
+                abvtext = abvraw[abvIndex:abvIndex+4].strip()
+                # if int(abvtext) < 1:
+                #     print '------------------------------------------------------------------'
             # print '000000000000000000000000000000000000000000000000000000000000000000000000'
             # print abvraw[abvIndex:abvIndex+4]
             # print abvIndex
-            yield {
-                'id': int(response.url.split('/')[6]),
-                'name': beer.css('div.titleBar h1::text').extract_first(),
-                'brewery': beer.css('div.titleBar h1 span::text').extract_first()[3:],
-                'state': beer.css('div.break a[href*=US]::text')[0].extract(),
-                'country': beer.css('div.break a[href*=US]::text')[1].extract(),
-                'style': beer.css('div.break a[href*=style] b::text').extract_first(),
-                'rating': beer.css('span.ba-ravg::text').extract_first(),
-                'abv': abvtext
-                # 'name': beer.css('ul li a[href*=profile]::attr(href)').extract()
-            }
+
+
+
+            beerid = int(response.url.split('/')[6])
+            name = beer.css('div.titleBar h1::text').extract_first()
+            breweryoriginal = beer.css('div.titleBar h1 span::text').extract_first()[3:]
+
+            brewerywords = breweryoriginal.split()
+            brewerytrimmed = [word for word in brewerywords if word.lower() not in stopwords]
+            brewery = ' '.join(brewerytrimmed)
+            # brewery = brewery.encode('ascii', 'ignore')
+            # translator = string.maketrans("", string.punctuation)
+
+            brewery = brewery.replace(".", "")
+            brewery = brewery.replace(",", "")
+
+            state = beer.css('div.break a[href*=US]::text')[0].extract()
+            country = beer.css('div.break a[href*=US]::text')[1].extract()
+            style = beer.css('div.break a[href*=style] b::text').extract_first()
+            rating = beer.css('span.ba-ravg::text').extract_first()
+            abv = abvtext
+
+            if beerid not in beerids:
+                beeritem = Beer()
+                beeritem['id'] = beerid
+                beeritem['name'] = name
+                beeritem['brewery'] = brewery
+                beeritem['breweryoriginal'] = breweryoriginal
+                beeritem['abv'] = abv
+                beeritem['style'] = style
+                beeritem['rating'] = rating
+                beeritem['state'] = state
+                beeritem['country'] = country
+
+                global beerids
+                beerids.append(beerid)
+
+                yield beeritem
+
+
+
+                # {
+                #     'id': int(response.url.split('/')[6]),
+                #     'name': beer.css('div.titleBar h1::text').extract_first(),
+                #     'brewery': beer.css('div.titleBar h1 span::text').extract_first()[3:],
+                #     'state': beer.css('div.break a[href*=US]::text')[0].extract(),
+                #     'country': beer.css('div.break a[href*=US]::text')[1].extract(),
+                #     'style': beer.css('div.break a[href*=style] b::text').extract_first(),
+                #     'rating': beer.css('span.ba-ravg::text').extract_first(),
+                #     'abv': abvtext
+                #     # 'name': beer.css('ul li a[href*=profile]::attr(href)').extract()
+                # }

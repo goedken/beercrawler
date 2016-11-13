@@ -1,8 +1,10 @@
 import scrapy
+import string
 from scrapy.loader import ItemLoader
 from beercrawler.items import Beer
 
-saveHTML = ""
+beerids = []
+stopwords = ['brewery', 'brewing', 'co', 'company', 'restaurant', '&', 'brewpub', 'inc', 'spirits']
 
 
 class UntappdSpider(scrapy.Spider):
@@ -22,32 +24,55 @@ class UntappdSpider(scrapy.Spider):
         f = open('untappdfiles/%s.html' % response.url.split('/')[5], 'w')
         f.write(response.body)
         # print "RESPONSE URL ----------------------" + response.url
+        index = 0
+        # print '---------------------------------------------------------------------'
+        # print response.url
+        # print response.request.url
+        # print '---------------------------------------------------------------------'
+        index += 1
         for beer in response.css('body'):
+
             abv1 = beer.css('div.details p.abv::text').extract_first().strip().split(' ')[0]
             abv = abv1.encode('ascii', 'ignore')
             abv = abv[:-1]
 
             beerid = int(response.url.split('/')[5])
             name = beer.css('div.name h1::text').extract_first().strip()
-            brewery = beer.css('p.brewery a::text').extract_first().strip()
+            breweryoriginal = beer.css('p.brewery a::text').extract_first().strip()
+
+            brewerywords = breweryoriginal.split()
+            brewerytrimmed = [word for word in brewerywords if word.lower() not in stopwords]
+            brewery = ' '.join(brewerytrimmed)
+
+            brewery = brewery.replace(".", "")
+            brewery = brewery.replace(",", "")
+
             style = beer.css('p.style::text').extract_first().strip()
             rating = beer.css('p.rating span.num::text').extract_first().split(')')[0][1:]
 
-            beeritem = Beer()
-            beeritem['id'] = beerid
-            beeritem['name'] = name
-            beeritem['brewery'] = brewery
-            beeritem['abv'] = abv
-            beeritem['style'] = style
-            beeritem['rating'] = rating
+            # print '---------------------------------------------------------------------'
+            # print beerids
+            # print '---------------------------------------------------------------------'
 
-            link = 'https://untappd.com' + beer.css('div.name p.brewery a::attr(href)').extract_first()
+            if beerid not in beerids:
+                beeritem = Beer()
+                beeritem['id'] = beerid
+                beeritem['name'] = name
+                beeritem['brewery'] = brewery
+                beeritem['breweryoriginal'] = breweryoriginal
+                beeritem['abv'] = abv
+                beeritem['style'] = style
+                beeritem['rating'] = rating
+
+                link = 'https://untappd.com' + beer.css('div.name p.brewery a::attr(href)').extract_first()
 
             # print '0000000000000000000000000000000000000000000000000'
             # print beeritem
             # print link
             #
-            yield scrapy.Request(link, callback=self.parse_page2, meta={'item': beeritem}, dont_filter=True)
+                global beerids
+                beerids.append(beerid)
+                yield scrapy.Request(link, callback=self.parse_page2, meta={'item': beeritem}, dont_filter=True)
             # request.meta['beeritem'] = beeritem
             # yield request
             #yield beer
